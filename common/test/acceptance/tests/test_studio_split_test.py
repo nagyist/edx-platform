@@ -57,7 +57,7 @@ class SplitTestMixin(object):
 
     def verify_add_missing_groups_button_not_present(self, container):
         """
-        Checks that the "add missing gorups" button/link is not present.
+        Checks that the "add missing groups" button/link is not present.
         """
         def missing_groups_button_not_present():
             button_present = container.missing_groups_button_present()
