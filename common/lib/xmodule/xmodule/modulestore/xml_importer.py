@@ -191,7 +191,7 @@ def import_from_xml(
         if target_course_id is not None:
             dest_course_id = target_course_id
         else:
-            dest_course_id = course_key
+            dest_course_id = store.make_course_key(course_key.org, course_key.course, course_key.run)
 
         runtime = None
         # Creates a new course if it doesn't already exist
