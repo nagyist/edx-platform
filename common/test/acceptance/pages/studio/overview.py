@@ -20,7 +20,7 @@ class CourseOutlineItem(object):
     """
     BODY_SELECTOR = None
     EDIT_BUTTON_SELECTOR = '.xblock-field-value-edit'
-    NAME_SELECTOR = '.xblock-title .xblock-field-value'
+    NAME_SELECTOR = '.xblock-field-value'
     NAME_INPUT_SELECTOR = '.xblock-field-input'
     NAME_FIELD_WRAPPER_SELECTOR = '.xblock-title .wrapper-xblock-field'
     STATUS_MESSAGE_SELECTOR = '> div[class$="status"] .status-message'
@@ -248,7 +248,7 @@ class CourseOutlineUnit(CourseOutlineChild):
         an initialized :class:`.ContainerPage` for that unit.
         """
         return ContainerPage(self.browser, self.locator).visit()
-    
+
     def is_browser_on_page(self):
         return self.q(css=self.BODY_SELECTOR).present
 
@@ -357,13 +357,13 @@ class CourseOutlinePage(CoursePage, CourseOutlineContainer):
         Return the :class:`.CourseOutlineSection` with the title `title`.
         """
         return self.child(title)
-    
+
     def section_at(self, index):
         """
         Returns the :class:`.CourseOutlineSection` at the specified index.
         """
         return self.child_at(index)
-        
+
     def click_section_name(self, parent_css=''):
         """
         Find and click on first section name in course outline
