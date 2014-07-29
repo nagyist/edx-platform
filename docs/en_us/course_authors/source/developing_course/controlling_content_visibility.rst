@@ -25,7 +25,9 @@ You schedule release dates for sections and subsections. Published units are
 visible to students after those release dates.
 
 Prior to the release date, content in the section or the subsection is not
-visible to students.
+visible to students. Such content is visible to course staff
+:ref:`previewing the course <Preview Course Content>` or :ref:`viewing the live
+course as staff<View Your Live Course>`.
 
 By default, a subsection inherits the release date of the section it is in,
 though you can change it.

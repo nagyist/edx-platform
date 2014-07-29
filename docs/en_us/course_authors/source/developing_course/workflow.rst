@@ -4,8 +4,8 @@
 Getting Started with Course Content Development
 ###############################################
 
-When you are done :ref:`Setting up your Course Index`, you are ready to build
-your course content.
+When you are done :ref:`setting up your course<Setting up your Course Index>`,
+you are ready to build your course content.
 
 This chapter provides an outline of the steps involved in developing your
 course content, with links to more details. See:
@@ -94,4 +94,3 @@ WORKFLOW DIAGRAM
 * :ref:`Add<Add a Component>`, :ref:`edit<Edit a Component>`, or
   :ref:`delete<Delete a Component>` components.
 * :ref:`Publish a Unit`
-   
