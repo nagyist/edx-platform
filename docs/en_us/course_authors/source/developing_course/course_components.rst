@@ -62,6 +62,9 @@ that you want:
 - :ref:`Working with HTML Components`
 - :ref:`Working with Problem Components`
 - :ref:`Working with Video Components`
+  
+After you add a component, it is not visible to students until you
+:ref:`publish the unit<Publish a Unit>`.
 
 .. _Edit a Component:
 
@@ -69,18 +72,15 @@ that you want:
 Edit a Component
 ********************
 
-You can edit a component only if the unit that contains it is Private, or if
-you are editing a new draft of the unit. For more information, see :ref:`Public
-and Private Units`.
-
-When you can edit the component, the Edit icon and the Display Name appear in
-the component header:
+To edit a component, click the Edit icon:
 
 .. image:: ../Images/unit-edit.png
   :alt: Image of a unit with Edit icon circled
 
-Click the Edit icon.  Then follow instructions for the type of component you
-are editing.
+Then follow instructions for the type of component you are editing.
+
+After you edit a component, the changes are not visible to students until you
+:ref:`publish the unit<Publish a Unit>`.
 
 =====================================
 Set the Display Name for a Component
@@ -110,24 +110,20 @@ but all have the **Display Name** field.
 Duplicate a Component
 **********************
 
-You can duplicate a component only if the unit that contains it is Private, or
-if you are editing a new draft of the unit. For more information, see
-:ref:`Public and Private Units`.
-
 When you duplicate a component, a new copy of that component is added directly
 beneath the first component. You can then modify the duplicate. In many cases,
 duplicating a component and editing a copy is a faster way to create new
 content.
 
-When you can duplicate the component, the Duplicate icon appears in the
-component header:
+To duplicate a component, click th Duplicate icon in the component header:
 
 .. image:: ../Images/unit-dup.png
   :alt: Image of a unit with Duplicate icon circled
 
+Then follow instructions for the type of component you are editing.
 
-Click the Duplicate icon.  Then follow instructions for the type of component
-you are editing.
+After you duplicate a component, the new component is not visible to students
+until you :ref:`publish the unit<Publish a Unit>`.
 
 .. _Delete a Component:
 
@@ -135,17 +131,14 @@ you are editing.
 Delete a Component
 **********************
 
-You can delete a component only if the unit that contains it is Private, or if
-you are editing a new draft of the unit. For more information, see :ref:`Public
-and Private Units`.
+.. note:: 
+ Be sure you want to delete the component. You can not undo the deletion.
 
-.. note:: Be sure you want to delete the component. You can not undo the
- deletion.
-
-When you can delete the component, the Delete icon appears in the component
-header:
+To delete a component, click the Delete icon in the component header:
 
 .. image:: ../Images/unit-delete.png
   :alt: Image of a unit with Delete icon circled
 
 Click the Delete icon.  Then confirm the deletion.
+
+After you delete a component, the component remians visible to students until you :ref:`publish the unit<Publish a Unit>`.

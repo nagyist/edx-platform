@@ -17,9 +17,9 @@ course content, with links to more details. See:
 
 .. _Understanding Course Building Blocks:
 
-************************************
-Understanding Course Building Blocks
-************************************
+************************************************
+Step 1: Understanding Course Building Blocks
+************************************************
 
 Before you begin, you should understand the building blocks of an edX course.
 
@@ -38,48 +38,47 @@ Before you begin, you should understand the building blocks of an edX course.
 
 .. _Creating New Course Content:
 
-****************************
-Creating New Course Content
-****************************
+****************************************
+Step 2: Creating New Course Content
+****************************************
 
-To create new course content, you set up the organization of your courseware,
-add the content in the right part of the course, schedule when different parts
-of the course are released, and publish content for students.
+Once you understand the way edX courses are structured, you can start
+organizing your content and entering it into Studio. As you build your outline
+and enter your content into your course, you'll also schedule when different
+parts of the course will be released. 
 
 WORKFLOW DIAGRAM
 
-See:
+For information, see the following tasks:
 
 #. :ref:`Create a Section`
-#. :ref:`Set a Section Release Date`
 #. :ref:`Create a Subsection`
-#. :ref:`Set a Subsection Release Date`
 #. :ref:`Create a Unit`
 #. :ref:`Add a Component`
-#. :ref:`Publish a Unit`
-
 
 .. _Making Course Content Visible to Students:
 
-******************************************
-Making Course Content Visible to Students
-******************************************
+******************************************************
+Step 3: Making Course Content Visible to Students
+******************************************************
 
-If and when the content you create is visible to students depends on the
-section and subsection release dates, the publishing status of the unit, and
-whether content at any level is explicitly hidden from students.
+When you create your content, you'll also specify if and when students will be
+able to see it. Content visibility depends on several factors: the release
+dates of the section and subsection, the publishing status of the unit, and the
+Hide content from students setting. For more information, see :ref:`Controlling
+Content Visibility`.
 
-See:
+Also see the following tasks:
 
-* :ref:`Release Dates`
-* :ref:`Unit State`
-* :ref:`Content Hidden from Students`
+* :ref:`Set a Section Release Date`
+* :ref:`Set a Subsection Release Date`
+* :ref:`Publish a Unit`
 
 
 .. _Revising Content:
 
 ****************************
-Revising Content
+Step 4: Revising Content
 ****************************
 
 You can revise your course content at any time. When you reorganize sections

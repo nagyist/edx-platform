@@ -304,8 +304,6 @@ When you are revising a previously published unit, it is helpful to preview
 your changes in one window and :ref:`view the published unit<View a Published
 Unit>` in a second window and compare the content.
 
-
-
 .. _Publish a Unit:
 
 ****************************
@@ -317,7 +315,8 @@ students.  If the release date for the section and subsection have passed, and
 you did not hide the unit from students, students can see the published unit.
 
 You publish a unit that is in the state `Draft (Never Published)`_ or `Draft
-(Unpublished Changes)`_. When you publish a unit the state changes to `Published`_.
+(Unpublished Changes)`_. When you publish a unit the state changes to
+`Published`_.
 
 To publish the unit, click **Publish** in the status panel:
 
