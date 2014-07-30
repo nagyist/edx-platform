@@ -127,6 +127,7 @@ class SplitTestFields(object):
         scope=Scope.content
     )
 
+
 @XBlock.needs('user_tags')  # pylint: disable=abstract-method
 @XBlock.wants('partitions')
 class SplitTestModule(SplitTestFields, XModule, StudioEditableModule):
@@ -148,6 +149,7 @@ class SplitTestModule(SplitTestFields, XModule, StudioEditableModule):
 
         super(SplitTestModule, self).__init__(*args, **kwargs)
 
+        self.descriptor.synchronize_dispay_names()
         self.child_descriptor = None
         child_descriptors = self.get_child_descriptors()
         if len(child_descriptors) >= 1:
@@ -587,3 +589,31 @@ class SplitTestDescriptor(SplitTestFields, SequenceDescriptor, StudioEditableDes
         )
         self.children.append(dest_usage_key)  # pylint: disable=no-member
         self.group_id_to_child[unicode(group.id)] = dest_usage_key
+
+    def synchronize_dispay_names(self):
+        children = self.get_children()
+
+        user_partition = self.get_selected_partition()
+        if not user_partition:
+            pass
+
+        def get_child_descriptor(location):
+            """
+            Returns the child descriptor which matches the specified location, or None if one is not found.
+            """
+            for child in children:
+                if child.location == location:
+                    return child
+            return None
+
+        modulestore = self.system.modulestore
+
+        for group in user_partition.groups:
+            group_id = unicode(group.id)
+            child_location = self.group_id_to_child.get(group_id, None)
+            child = get_child_descriptor(child_location)
+            if child and unicode(getattr(child, 'display_name')) != getattr(group, 'name'):
+                child.display_name = group.name
+                user_id = self.runtime.service(self, 'user').user_id
+                modulestore.update_item(child, user_id)
+                break
