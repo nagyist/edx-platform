@@ -103,12 +103,22 @@ def instructor_dashboard_2(request, course_id):
     if max_enrollment_for_buttons is not None:
         disable_buttons = enrollment_count > max_enrollment_for_buttons
 
+    deprecated_course_key = unicode(course_key)
+
+    analytics_dashboard_message = None
+    if settings.ANALYTICS_DASHBOARD_URL:
+        analytics_dashboard_url = '{0}/courses/{1}'.format(settings.ANALYTICS_DASHBOARD_URL, deprecated_course_key)
+        link_start = "<a href=\"{}\" target=\"_blank\">".format(analytics_dashboard_url)
+        analytics_dashboard_message = _("{link_start}Visit the new analytics dashboard{link_end} to gain insights into your student enrollment and performance.")
+        analytics_dashboard_message = analytics_dashboard_message.format(link_start=link_start, link_end="</a>")
+
     context = {
         'course': course,
-        'old_dashboard_url': reverse('instructor_dashboard_legacy', kwargs={'course_id': course_key.to_deprecated_string()}),
+        'old_dashboard_url': reverse('instructor_dashboard_legacy', kwargs={'course_id': deprecated_course_key}),
         'studio_url': studio_url,
         'sections': sections,
         'disable_buttons': disable_buttons,
+        'analytics_dashboard_message': analytics_dashboard_message
     }
 
     return render_to_response('instructor/instructor_dashboard_2/instructor_dashboard_2.html', context)
