@@ -206,9 +206,6 @@ The following information summarizes whether or not students can see a unit.
   * The release date for the containing section and subsection has passed. See
     :ref:`Release Dates` for more information.
 
-  * The unit was was not hidden from students. See
-    :ref:`Content Hidden from Students` for more information.
-
 For more information, see :ref:`Controlling Content Visibility`.
 
 .. _Create a Unit:
@@ -337,7 +334,7 @@ In certain situations, you may decide that you never want to publish your
 changes. You can discard the changes to that Studio saves the last published
 version of the unit.
 
-To discard changes and revert the studio version of the unit to the last
+To discard changes and revert the Studio version of the unit to the last
 published version, click Discard Changes in the status panel:
 
 .. image:: ../Images/unit-discard-changes.png

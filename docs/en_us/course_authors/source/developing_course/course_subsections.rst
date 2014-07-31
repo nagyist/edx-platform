@@ -60,30 +60,13 @@ Subsection States
 
 As an course author, you work with subsections in the following states:
 
-* `Unscheduled`_
 * `Scheduled with Section`_
+* `Unscheduled`_
 * `Scheduled`_
 * `Scheduled with Unpublished Changes`_
 * `Released with Unpublished Changes`_
 * `Released`_
 * `Hidden from Students`_
-
-========================
-Unscheduled
-========================
-
-NOT APPLICABLE TO SUBSECTIONS?  CONFIRM REMOVE WHOLE SECTION
-
-When you create a subsection, it does not have a scheduled release date.
-Regardless of the state of units within the subsection, the entire subsection
-is not visible to students.
-
-The following example shows how an subsection in the Draft: Unscheduled state
-is displayed in the outline:
-
-TBP
-
-To make the content available to students, you must schedule the release date.
 
 =======================
 Scheduled with Section
@@ -96,6 +79,23 @@ The following example shows how an subsection in the Scheduled with Section
 state is displayed in the outline:
 
 TBP
+
+========================
+Unscheduled
+========================
+
+If the containing section is unscheduled, when you create a new subsection it
+will also be unscheduled.
+
+Regardless of the state of units within the subsection, no content in an
+unscheduled subsection is visible to students.
+
+The following example shows how an subsection in the Draft: Unscheduled state
+is displayed in the outline:
+
+TBP
+
+To make the content available to students, you must schedule the release date.
 
 
 =======================
@@ -119,11 +119,11 @@ Scheduled with Unpublished Changes
 ==================================
 
 You can make changes to a published unit before its containing subsection
-releases.  In this situation, when the release date for the subsection passes,
+releases. In this situation, when the release date for the subsection passes,
 the last published version of units within the subsection are made available to
-students. You changes are not visible to students until you publish them.
+students. your changes are not visible to students until you publish them.
 
-The following example shows how an subsection in the Scheduled state with
+The following example shows how a subsection in the Scheduled state with
 unpublished changes is displayed in the outline:
 
 TBP
@@ -137,7 +137,7 @@ If you modify a unit within a released subsection, those modifications are not
 visible to students until you publish them.
 
 
-The following example shows how an subsection in the released state with
+The following example shows how a subsection in the released state with
 unpublished changes is displayed in the outline:
 
 TBP
@@ -149,7 +149,7 @@ Released
 A subsection that is released is visible to students; however students see only
 units within the subsection that are Published.
 
-The following example shows how an subsection in the Released state is
+The following example shows how a subsection in the Released state is
 displayed in the outline:
 
 
@@ -161,7 +161,7 @@ Hidden from Students
 A subsection that is hidden from students is not available, regardless of the
 published state of any units.
 
-The following example shows how an subsection that is hidden from students is
+The following example shows how a subsection that is hidden from students is
 displayed in the outline:
 
 TBP

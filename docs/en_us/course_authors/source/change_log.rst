@@ -13,7 +13,9 @@ August, 2014
 .. list-table::
    :widths: 10 70
    :header-rows: 1
-
+   
+ * - Date
+   - Change
  * - 08/12/14
    - Reorganized this document to account for changes in the publishing
      workflow and the Outline and Unit pages. There is a new section,
