@@ -44,8 +44,7 @@ To enable content experiments in your course, you add ``split_test`` to the
        "split_test"
      ]
 
-#. At the bottom of the page, click **Save Changes**.
-
+Your changes are automatically saved.
 
 .. _Overview of Group Configurations:
 
@@ -143,7 +142,7 @@ You can create a group configurations at any time.
   * Click **Add another group** to include another group as part of the
     configuration.
   * Click the **X** to the right of an existing group to remove it from the
-    configuration. Note that the configuration must have at least two groups.
+    configuration.
 
 5. Click **Create** to save the new group configuration.
    
@@ -178,7 +177,7 @@ You can change the group configuration name at any time.
 
 #. Modify the name and description as needed.
 #. Modify groups in the configuration as needed. See `Create a Group
-   Configuration` for details.
+   Configuration`_ for details.
    
 4. Click **Save** to save your changes.
 
@@ -218,6 +217,35 @@ links to experiments that use the group configuration:
  :alt: A Group Configuration with the experiments using it circled
 
 Click a link to go to the unit page that contains the experiment.
+
+===============================================
+View a Group Configuration from an Experiment
+===============================================
+
+When working with a content experiment, you can view details about the group
+configuration used by that experiment.
+
+In the content experiment in the unit page, click the name of the group
+configuration.
+
+.. image:: ../Images/content_experiment_group_config_link.png
+ :alt: Content experiment in the unit page with the group configuration link
+     circled
+
+Or at the top of the content experiment page, click the name of the group
+configuration
+
+.. image:: ../Images/content_experiment_page_group_config_link.png
+ :alt: Content experiment page with the group configuration link circled
+
+In both cases, the group configuration opens:
+
+.. image:: ../Images/group_configurations_experiments.png
+ :alt: A Group Configuration with the experiments using it circled
+
+You can use the link in the group configuration to return to the unit that
+contains the content experiment.
+
 
 .. _Guidelines for Modifying Group Configurations:
 
