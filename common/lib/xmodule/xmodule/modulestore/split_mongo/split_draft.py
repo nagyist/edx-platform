@@ -246,6 +246,13 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
         """
         raise NotImplementedError()
 
+    def get_head(self, branch, location):
+        """
+        Return the block's persisted (json) representation from the head of the given branch.
+        """
+        course_structure = self._lookup_course(location.course_key.for_branch(branch))['structure']
+        return self._get_block_from_structure(course_structure, location.block_id)
+
     def compute_publish_state(self, xblock):
         """
         Returns whether this xblock is draft, public, or private.
@@ -255,10 +262,6 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
             PublishState.public - published exists and is the same as draft
             PublishState.private - no published version exists
         """
-        def get_head(branch):
-            course_structure = self._lookup_course(xblock.location.course_key.for_branch(branch))['structure']
-            return self._get_block_from_structure(course_structure, xblock.location.block_id)
-
         def get_version(block):
             """
             Return the version of the given database representation of a block.
@@ -266,8 +269,8 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
             #TODO: make this method a more generic helper
             return block['edit_info'].get('source_version', block['edit_info']['update_version'])
 
-        draft_head = get_head(ModuleStoreEnum.BranchName.draft)
-        published_head = get_head(ModuleStoreEnum.BranchName.published)
+        draft_head = self.get_head(ModuleStoreEnum.BranchName.draft, xblock.location)
+        published_head = self.get_head(ModuleStoreEnum.BranchName.published, xblock.location)
 
         if not published_head:
             # published version does not exist
@@ -287,3 +290,25 @@ class DraftVersioningModuleStore(ModuleStoreDraftAndPublished, SplitMongoModuleS
         """
         # This is a no-op in Split since a draft version of the data always remains
         pass
+
+    def import_xblock(self, user_id, course_key, block_type, block_id, fields=None, runtime=None):
+        """
+        Split-based modulestores need to import published blocks to both branches
+        """
+        new_usage_key = course_key.make_usage_key(block_type, block_id)
+
+        if self.get_branch_setting(course_key) == ModuleStoreEnum.Branch.published_only:
+            # if new to published
+            if not self.has_item(new_usage_key):
+                # check whether it's new to draft
+                if not self.has_item(new_usage_key.for_branch(ModuleStoreEnum.BranchName.draft)):
+                    # add to draft too
+                    draft_course = course_key.for_branch(ModuleStoreEnum.BranchName.draft)
+                    with self.branch_setting(ModuleStoreEnum.Branch.draft_preferred, draft_course):
+                        self.import_xblock(user_id, draft_course, block_type, block_id, fields, runtime)
+
+        # do the import
+        partitioned_fields = self.partition_fields_by_scope(block_type, fields)
+        return self._update_item_from_fields(
+            user_id, course_key, block_type, block_id, partitioned_fields, None, allow_not_found=True, force=True
+        )
