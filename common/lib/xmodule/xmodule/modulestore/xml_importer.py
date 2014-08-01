@@ -524,6 +524,13 @@ def _import_course_draft(
                 course_key = descriptor.location.course_key
                 try:
                     def _import_module(module):
+                        # IMPORTANT: Be sure to update the module location in the NEW namespace
+                        module_location = module.location.map_into_course(target_course_id)
+                        # Update the module's location to DRAFT revision
+                        # We need to call this method (instead of updating the location directly)
+                        # to ensure that pure XBlock field data is updated correctly.
+                        _update_module_location(module, module_location.replace(revision=MongoRevisionKey.draft))
+
                         # make sure our parent has us in its list of children
                         # this is to make sure private only verticals show up
                         # in the list of children since they would have been
