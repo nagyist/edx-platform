@@ -15,7 +15,7 @@ from opaque_keys.edx.locations import SlashSeparatedCourseKey
 
 from . import ModuleStoreWriteBase
 from . import ModuleStoreEnum
-from .exceptions import ItemNotFoundError
+from .exceptions import ItemNotFoundError, DuplicateCourseError
 from .draft_and_published import ModuleStoreDraftAndPublished
 from .split_migrator import SplitMigrator
 
@@ -100,7 +100,7 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
                 return mapping
             else:
                 for store in self.modulestores:
-                    if isinstance(course_id, store.reference_type) and store.has_course(course_id):
+                    if store.has_course(course_id):
                         self.mappings[course_id] = store
                         return store
 
@@ -198,6 +198,22 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
 
         return courses.values()
 
+    def make_course_key(self, org, course, run):
+        """
+        Return a valid :class:`~opaque_keys.edx.keys.CourseKey` for this modulestore
+        that matches the supplied `org`, `course`, and `run`.
+
+        This key may represent a course that doesn't exist in this modulestore.
+        """
+        # If there is a mapping that match this org/course/run, use that
+        for course_id, store in self.mappings.iteritems():
+            candidate_key = store.make_course_key(org, course, run)
+            if candidate_key == course_id:
+                return candidate_key
+
+        # Otherwise, return the key created by the default store
+        return self.modulestores[0].make_course_key(org, course, run)
+
     def get_course(self, course_key, depth=0):
         """
         returns the course module associated with the course_id. If no such course exists,
@@ -285,8 +301,19 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
 
         Returns: a CourseDescriptor
         """
+        # first make sure an existing course doesn't already exist in the mapping
+        course_key = self.make_course_key(org, course, run)
+        if course_key in self.mappings:
+            raise DuplicateCourseError(course_key, course_key)
+
+        # create the course
         store = self._verify_modulestore_support(None, 'create_course')
-        return store.create_course(org, course, run, user_id, **kwargs)
+        course = store.create_course(org, course, run, user_id, **kwargs)
+
+        # add new course to the mapping
+        self.mappings[course_key] = store
+
+        return course
 
     def clone_course(self, source_course_id, dest_course_id, user_id, fields=None):
         """
@@ -506,11 +533,13 @@ class MixedModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         try:
             for i, store in enumerate(self.modulestores):
                 if store.get_modulestore_type() == store_type:
+                    # TODO - this is NOT multi-process safe
                     self.modulestores.insert(0, self.modulestores.pop(i))
                     found = True
-                    yield
+                    break
             if not found:
                 raise Exception(u"Cannot find store of type {}".format(store_type))
+            yield
         finally:
             self.modulestores = previous_store_list
 

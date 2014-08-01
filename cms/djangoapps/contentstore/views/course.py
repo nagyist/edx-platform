@@ -24,7 +24,7 @@ from xmodule.contentstore.content import StaticContent
 from xmodule.tabs import PDFTextbookTabs
 from xmodule.partitions.partitions import UserPartition, Group
 
-from xmodule.modulestore.exceptions import ItemNotFoundError, InvalidLocationError
+from xmodule.modulestore.exceptions import ItemNotFoundError, DuplicateCourseError
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.locations import Location, SlashSeparatedCourseKey
 
@@ -53,7 +53,7 @@ from .component import (
     ADVANCED_COMPONENT_POLICY_KEY,
     SPLIT_TEST_COMPONENT_TYPE,
 )
-from .tasks import rerun_course
+from contentstore.tasks import rerun_course
 
 from opaque_keys.edx.keys import CourseKey
 from course_creators.views import get_course_creator_status, add_user_with_status_unrequested
@@ -450,7 +450,7 @@ def _create_or_rerun_course(request):
     """
     To be called by requests that create a new destination course (i.e., create_new_course and rerun_course)
     Returns the destination course_key and overriding fields for the new course.
-    Raises InvalidLocationError and InvalidKeyError
+    Raises DuplicateCourseError and InvalidKeyError
     """
     if not auth.has_access(request.user, CourseCreatorRole()):
         raise PermissionDenied()
@@ -477,7 +477,7 @@ def _create_or_rerun_course(request):
         else:
             return _create_new_course(request, course_key, fields)
 
-    except InvalidLocationError:
+    except DuplicateCourseError:
         return JsonResponse({
             'ErrMsg': _(
                 'There is already a course defined with the same '
@@ -510,7 +510,7 @@ def _create_new_course(request, course_key, fields):
     definition_data = {'wiki_slug': wiki_slug}
     fields.update(definition_data)
 
-    # Creating the course raises InvalidLocationError if an existing course with this org/name is found
+    # Creating the course raises DuplicateCourseError if an existing course with this org/name is found
     new_course = modulestore().create_course(
         course_key.org,
         course_key.course,
@@ -543,7 +543,7 @@ def _rerun_course(request, destination_course_key, fields):
 
     # verify org course and run don't already exist
     if modulestore().has_course(destination_course_key):
-        raise InvalidLocationError
+        raise DuplicateCourseError(source_course_key, destination_course_key)
 
     # Make sure user has instructor and staff access to the destination course
     # so the user can see the updated status for that course

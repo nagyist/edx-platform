@@ -378,6 +378,15 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
                 result.append(course_list[0])
         return result
 
+    def make_course_key(self, org, course, run):
+        """
+        Return a valid :class:`~opaque_keys.edx.keys.CourseKey` for this modulestore
+        that matches the supplied `org`, `course`, and `run`.
+
+        This key may represent a course that doesn't exist in this modulestore.
+        """
+        return CourseLocator(org, course, run)
+
     def get_course(self, course_id, depth=0):
         '''
         Gets the course descriptor for the course identified by the locator
@@ -949,6 +958,8 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         """
         super(SplitMongoModuleStore, self).clone_course(source_course_id, dest_course_id, user_id, fields)
         source_index = self.get_course_index_info(source_course_id)
+        if source_index is None:
+            raise ItemNotFoundError("Cannot find a course at {0}. Aborting".format(source_course_id))
         return self.create_course(
             dest_course_id.org, dest_course_id.course, dest_course_id.run, user_id, fields=fields,
             versions_dict=source_index['versions'], search_targets=source_index['search_targets']
@@ -1475,7 +1486,7 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         """
         index = self.db_connection.get_course_index(course_key)
         if index is None:
-            raise ItemNotFoundError(course_key)
+            raise ItemNotFoundError("Could not find course: ".format(course_key))
         # this is the only real delete in the system. should it do something else?
         log.info(u"deleting course from split-mongo: %s", course_key)
         self.db_connection.delete_course_index(index)
