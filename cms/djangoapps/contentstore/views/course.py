@@ -397,6 +397,8 @@ def course_listing(request):
         if not isinstance(c, ErrorDescriptor) and (c.id not in unsucceeded_action_course_keys)
     ]
 
+    unsucceeded_action_course_keys = [format_unsucceeded_course_for_view(uca) for uca in unsucceeded_course_actions]
+
     return render_to_response('index.html', {
         'courses': courses,
         'unsucceeded_course_actions': unsucceeded_course_actions,
