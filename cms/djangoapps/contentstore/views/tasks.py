@@ -8,14 +8,18 @@ from xmodule.modulestore.django import modulestore
 from xmodule.modulestore.exceptions import DuplicateCourseError
 from course_action_state.models import CourseRerunState
 from contentstore.utils import initialize_permissions
+from opaque_keys.edx.keys import CourseKey
 
 
 @task()
-def rerun_course(source_course_key, destination_course_key, user_id, fields=None):
+def rerun_course(source_course_key_string, destination_course_key_string, user_id, fields=None):
     """
     Reruns a course in a new celery task.
     """
     try:
+        source_course_key = CourseKey.from_string(source_course_key_string)
+        destination_course_key = CourseKey.from_string(destination_course_key_string)
+
         modulestore().clone_course(source_course_key, destination_course_key, user_id, fields=fields)
 
         # set initial permissions for the user to access the course.

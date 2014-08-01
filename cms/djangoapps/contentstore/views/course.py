@@ -376,16 +376,17 @@ def course_listing(request):
             course.location.name
         )
 
-    def format_unsucceeded_course_for_view(uca, course):
+    def format_unsucceeded_course_for_view(uca):
         """
         return tuple of the data which the view requires for each unsucceeded course
         """
         return (
-            course.display_name,
-            course.display_org_with_default,
-            course.display_number_with_default,
-            course.location.name,
-
+            uca.display_name,
+            uca.course_key.org,
+            uca.course_key.course,
+            uca.course_key.run,
+            True if uca.state == CourseRerunUIStateManager.State.FAILED else False,
+            True if uca.state == CourseRerunUIStateManager.State.IN_PROGRESS else False,
         )
 
     # remove any courses in courses that are also in the unsucceeded_course_actions list
@@ -550,7 +551,7 @@ def _rerun_course(request, destination_course_key, fields):
     CourseRerunState.objects.initiated(source_course_key, destination_course_key, request.user, fields['display_name'])
 
     # Rerun the course as a new celery task
-    rerun_course.delay(source_course_key, destination_course_key, request.user.id, fields)
+    rerun_course.delay(unicode(source_course_key), unicode(destination_course_key), request.user.id, fields)
 
     # Return course listing page
     return JsonResponse({'url': reverse_url('course_handler')})

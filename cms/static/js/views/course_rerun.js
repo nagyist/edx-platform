@@ -41,9 +41,8 @@ require(["domReady", "jquery", "underscore", "js/utils/cancel_on_escape"],
                 },
                 function (data) {
                     if (data.url !== undefined) {
-                        // Not sure what to do in this case
+                        window.location = data.url
                     } else if (data.ErrMsg !== undefined) {
-                        window.stop();
                         $('.wrapper-error').addClass('is-shown').removeClass('is-hidden');
                         $('#course_rerun_error').html('<p>' + data.ErrMsg + '</p>');
                         $('.rerun-course-save').addClass('is-disabled').removeClass('is-processing').html(gettext('Create Re-run'));
@@ -56,7 +55,6 @@ require(["domReady", "jquery", "underscore", "js/utils/cancel_on_escape"],
                '<i class="icon-refresh icon-spin"></i>' + gettext('Processing Re-run Request')
             );
             $('.action-cancel').addClass('is-hidden');
-            window.location = '/course/';
         };
 
         var cancelRerunCourse = function (e) {
