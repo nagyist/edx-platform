@@ -63,7 +63,7 @@ class ContentStoreImportTest(ModuleStoreTestCase):
         # edx/course can be imported into a namespace with an org/course
         # like edx/course_name
         module_store, __, course = self.load_test_import_course()
-        __, course_items = import_from_xml(
+        course_items = import_from_xml(
             module_store,
             self.user.id,
             'common/test/data',
@@ -138,7 +138,7 @@ class ContentStoreImportTest(ModuleStoreTestCase):
 
     def test_no_static_link_rewrites_on_import(self):
         module_store = modulestore()
-        _, courses = import_from_xml(module_store, self.user.id, 'common/test/data/', ['toy'], do_import_static=False, verbose=True)
+        courses = import_from_xml(module_store, self.user.id, 'common/test/data/', ['toy'], do_import_static=False, verbose=True)
         course_key = courses[0].id
 
         handouts = module_store.get_item(course_key.make_usage_key('course_info', 'handouts'))

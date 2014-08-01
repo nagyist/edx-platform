@@ -117,29 +117,36 @@ def import_from_xml(
         target_course_id=None, verbose=False,
         do_import_static=True, create_new_course_if_not_present=False):
     """
-    Import the specified xml data_dir into the "store" modulestore,
-    using org and course as the location org and course.
+    Import xml-based courses from data_dir into modulestore.
 
-    course_dirs: If specified, the list of course_dirs to load. Otherwise, load
-    all course dirs
+    Returns:
+        list of new course objects
 
-    target_course_id is the CourseKey that all modules should be remapped to
-    after import off disk. We do this remapping as a post-processing step
-    because there's logic in the importing which expects a 'url_name' as an
-    identifier to where things are on disk
-    e.g. ../policies/<url_name>/policy.json as well as metadata keys in
-    the policy.json. so we need to keep the original url_name during import
+    Args:
+        store: a modulestore implementing ModuleStoreWriteBase in which to store the imported courses.
 
-    :param do_import_static:
-        if False, then static files are not imported into the static content
-        store. This can be employed for courses which have substantial
-        unchanging static content, which is to inefficient to import every
-        time the course is loaded. Static content for some courses may also be
-        served directly by nginx, instead of going through django.
+        data_dir: the root directory from which to find the xml courses.
 
-    : create_new_course_if_not_present:
-        If True, then a new course is created if it doesn't already exist.
-        The check for existing courses is case-insensitive.
+        course_dirs: If specified, the list of data_dir subdirectories to load. Otherwise, load
+            all course dirs
+
+        target_course_id: is the CourseKey that all modules should be remapped to
+            after import off disk. NOTE: this only makes sense if importing only
+            one course. If there are more than one course loaded from data_dir/course_dirs & you
+            supply this id, this method will raise an AssertException.
+
+        static_content_store: the static asset store
+
+        do_import_static: if True, then import the course's static files into static_content_store
+            This can be employed for courses which have substantial
+            unchanging static content, which is too inefficient to import every
+            time the course is loaded. Static content for some courses may also be
+            served directly by nginx, instead of going through django.
+
+        create_new_course_if_not_present: If True, then a new course is created if it doesn't already exist.
+            Otherwise, it throws an InvalidLocationError for the course.
+
+        default_class, load_error_modules: are arguments for constructing the XMLModuleStore (see its doc)
     """
 
     xml_module_store = XMLModuleStore(
@@ -156,12 +163,7 @@ def import_from_xml(
     if target_course_id:
         assert(len(xml_module_store.modules) == 1)
 
-    # NOTE: the XmlModuleStore does not implement get_items()
-    # which would be a preferable means to enumerate the entire collection
-    # of course modules. It will be left as a TBD to implement that
-    # method on XmlModuleStore.
-    course_items = []
-
+    new_courses = []
     for course_key in xml_module_store.modules.keys():
 
         if target_course_id is not None:
@@ -176,8 +178,8 @@ def import_from_xml(
             except InvalidLocationError:
                 # course w/ same org and course exists
                 log.debug(
-                    "Skipping import of course with id, {0},"
-                    "since it collides with an existing one".format(dest_course_id)
+                    "Skipping import of course with id, %s,"
+                    "since it collides with an existing one", dest_course_id
                 )
                 continue
 
@@ -186,7 +188,7 @@ def import_from_xml(
             course, course_data_path = _import_course_module(
                 xml_module_store, store, user_id, data_dir, course_key, dest_course_id, do_import_static, verbose
             )
-            course_items.append(course)
+            new_courses.append(course)
 
             # STEP 2: import static content
             _import_static_content_wrapper(
@@ -225,7 +227,7 @@ def import_from_xml(
                     course.runtime
                 )
 
-    return xml_module_store, course_items
+    return new_courses
 
 
 def _import_course_module(
@@ -522,13 +524,6 @@ def _import_course_draft(
                 course_key = descriptor.location.course_key
                 try:
                     def _import_module(module):
-                        # IMPORTANT: Be sure to update the module location in the NEW namespace
-                        module_location = module.location.map_into_course(target_course_id)
-                        # Update the module's location to DRAFT revision
-                        # We need to call this method (instead of updating the location directly)
-                        # to ensure that pure XBlock field data is updated correctly.
-                        _update_module_location(module, module_location.replace(revision=MongoRevisionKey.draft))
-
                         # make sure our parent has us in its list of children
                         # this is to make sure private only verticals show up
                         # in the list of children since they would have been
