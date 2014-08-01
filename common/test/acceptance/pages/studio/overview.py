@@ -20,7 +20,7 @@ class CourseOutlineItem(object):
     """
     BODY_SELECTOR = None
     EDIT_BUTTON_SELECTOR = '.xblock-field-value-edit'
-    NAME_SELECTOR = '.xblock-field-value'
+    NAME_SELECTOR = '.item-title'
     NAME_INPUT_SELECTOR = '.xblock-field-input'
     NAME_FIELD_WRAPPER_SELECTOR = '.xblock-title .wrapper-xblock-field'
     STATUS_MESSAGE_SELECTOR = '> div[class$="status"] .status-message'
