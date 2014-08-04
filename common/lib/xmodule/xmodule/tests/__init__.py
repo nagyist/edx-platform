@@ -294,7 +294,6 @@ class CourseComparisonTest(unittest.TestCase):
         ``actual_course_key`` in ``actual_store`` are identical, allowing for differences related
         to their being from different course keys.
         """
-        return  # FIXME remove
         expected_content, expected_count = expected_store.get_all_content_for_course(expected_course_key)
         actual_content, actual_count = actual_store.get_all_content_for_course(actual_course_key)
 
