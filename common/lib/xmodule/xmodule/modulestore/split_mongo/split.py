@@ -295,7 +295,6 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
             version_guid = index['versions'][course_locator.branch]
             if course_locator.version_guid is not None and version_guid != course_locator.version_guid:
                 # This may be a bit too touchy but it's hard to infer intent
-                import nose.tools; nose.tools.set_trace()
                 raise VersionConflictError(course_locator, version_guid)
         elif course_locator.version_guid is None:
             raise InsufficientSpecificationError(course_locator)
@@ -1132,12 +1131,15 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
                 for subfields in partitioned_fields.itervalues():
                     fields.update(subfields)
                 return self.create_item(
-                    user_id, course_key, block_type, fields=fields, force=force
+                    user_id, course_key, block_type, block_id=block_id, fields=fields, force=force,
                 )
             else:
                 raise ItemNotFoundError(course_key.make_usage_key(block_type, block_id))
 
+        is_updated = False
         definition_fields = partitioned_fields[Scope.content]
+        if definition_locator is None:
+            definition_locator = DefinitionLocator(original_entry['category'], original_entry['definition'])
         if definition_fields:
             definition_locator, is_updated = self.update_definition_from_data(
                 definition_locator, definition_fields, user_id
@@ -1392,8 +1394,13 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
             root_block_id = source_structure['root']
             if not any(root_block_id == subtree.block_id for subtree in subtree_list):
                 raise ItemNotFoundError(u'Must publish course root {}'.format(root_block_id))
+            root_source = source_structure['blocks'][root_block_id]
             # create branch
-            destination_structure = self._new_structure(user_id, root_block_id)
+            destination_structure = self._new_structure(
+                user_id, root_block_id, root_category=root_source['category'],
+                # leave off the fields b/c the children must be filtered
+                definition_id=root_source['definition'],
+            )
         else:
             destination_structure = self._lookup_course(destination_course)['structure']
             destination_structure = self._version_structure(destination_structure, user_id)
@@ -1794,6 +1801,8 @@ class SplitMongoModuleStore(ModuleStoreWriteBase):
         new_id = ObjectId()
         if root_category is not None:
             encoded_root = encode_key_for_mongo(root_block_id)
+            if block_fields is None:
+                block_fields = {}
             blocks = {
                 encoded_root: self._new_block(
                     user_id, root_category, block_fields, definition_id, new_id

@@ -1054,6 +1054,8 @@ class MongoModuleStore(ModuleStoreDraftAndPublished, ModuleStoreWriteBase):
         """
         Simple implementation of overwriting any existing xblock
         """
+        if block_type == 'course':
+            block_id = course_key.run
         xblock = self.create_xblock(runtime, course_key, block_type, block_id, fields)
         return self.update_item(xblock, user_id, allow_not_found=True)
 
