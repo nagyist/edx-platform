@@ -35,11 +35,11 @@ To view the course outline:
    
 The first time you view an outline for a course, it contains no content. 
 
-IMAGE of empty outline
+.. image:: ../Images/outline_empty.png
+ :alt: An empty course outline
 
 You must :ref:`create the first section<Create a Section>`.
   
-
 ********************************************************
 Example of a Developed Course in the Outline
 ********************************************************
@@ -48,7 +48,8 @@ The following example shows a sample course in the outline, with indications
 for sections, subsections, and units. As you develop your course, it will begin
 to look like this example:
 
-IMAGE with callouts for sections, subsections, units in Studio
+.. image:: ../Images/outline-callouts.png
+ :alt: An empty course outline
 
 As this example shows, the course is organized at the following levels:
 
@@ -79,9 +80,19 @@ course content:
 Navigating the Course Outline
 *******************************
 
-Expand/collapse
-View object details
+You navigate the course outline by expanding and collapsing sections and
+subsections.  Use the triangle icon next to a section or subsection name to
+expand or collapse its contents:
 
+.. image:: ../Images/outline-expand-collapse.png
+ :alt: The outline with expand and collapse icons circled
+
+When you expand a subsection, all units in the subsection are visible:
+
+.. image:: ../Images/outline-with-units.png
+ :alt: The outline with an expanded subsection
+
+Click the name of a unit to open the :ref:`unit page<Developing Course Units>`.
 
 .. _Add Content in the Course Outline:
 
@@ -89,11 +100,27 @@ View object details
 Add Content in the Course Outline
 ************************************************
 
-Add Sections
+You add sections, subsections, and units directly in the outline.
 
-Add subsections
+To add a section to the end of the outline, click **New Section** at the top of
+the outline page or at the bottom of the outline:
 
-Add units
+.. image:: ../Images/outline-create-section.png
+ :alt: The outline with the New Section buttons circled
+
+To add a subsection to the end of the section, expand a section and click **New
+Subsection**:
+
+.. image:: ../Images/outline-new-subsection.png
+ :alt: The outline with the New Subsection button circled
+
+To add a unit to the end of a subsection, expand the subsection and click **New
+Unit**:
+
+.. image:: ../Images/outline-new-unit.png
+ :alt: The outline with the New Subsection button circled
+
+The :ref:`unit<Developing Course Units>` page opens.
 
 .. _Reorganize the Course Outline:
 
@@ -101,8 +128,18 @@ Add units
 Reorganize the Course Outline
 ************************************************
 
-DRAG and DROP
+You can reorganize your course content by dragging and dropping sections,
+subsections and units to new locations in the outline.
 
+If you wan to move a subsection to a different section, or a unit to a
+different subsection, first make make sure the target location is expanded.
+
+To move an section, subsection, or unit, hover over the handle on the right of
+the object's box until the mouse pointer changes to a four-headed arrow:
+
+Then, click and drag the object to the location that you want. When you move an
+object, a blue line indicates where the object will land when you release the
+mouse button:
 
 .. _Delete Content in the Course Outline:
 
@@ -110,9 +147,23 @@ DRAG and DROP
 Delete Content in the Course Outline
 ************************************************
 
-Delete button
+You delete sections, subsections, and units from the course outline.
 
+.. warning::  
+ You cannot restore course content after you delete it. To ensure you do not
+ delete content you may need later, you can move any unused content to a
+ section in your course that you set to never release.
 
+Click the delete icon in the box for the object you want to delete:
+
+.. image:: ../Images/outline-delete.png
+ :alt: The outline with Delete icons circled
+
+You are prompted to confirm the deletion.
+
+.. note::
+ When you delete an object, all contained objects are deleted. For example,
+ when you delete a subsection, all units in that subsection are deleted.
 
 ************************************************
 The Course Outline User Interface

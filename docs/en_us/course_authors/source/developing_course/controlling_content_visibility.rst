@@ -13,7 +13,7 @@ You control content visibility through three features in Studio:
 * `Unit State`_
 * `Content Hidden from Students`_
   
- All three features work together to control content visibility.
+ All three features work together to control content visibility for students.
 
 .. _Release Dates:
 

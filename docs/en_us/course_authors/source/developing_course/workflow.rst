@@ -36,6 +36,8 @@ Before you begin, you should understand the building blocks of an edX course.
 * :ref:`Course components<Developing Course Components>` are objects within
   units that contain your actual course content.
 
+ RELATIONSHIP DIAGRAM
+
 .. _Creating New Course Content:
 
 ****************************************
@@ -43,9 +45,7 @@ Step 2: Creating New Course Content
 ****************************************
 
 Once you understand the way edX courses are structured, you can start
-organizing your content and entering it into Studio. As you build your outline
-and enter your content into your course, you'll also schedule when different
-parts of the course will be released. 
+organizing your content and entering it into Studio. 
 
 WORKFLOW DIAGRAM
 
