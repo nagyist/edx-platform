@@ -179,7 +179,7 @@ class SplitTest(ContainerBase, SplitTestMixin):
 
 
 @attr('shard_1')
-@skipUnless(os.environ.get('FEATURE_GROUP_CONFIGURATIONS'), 'Tests Group Configurations feature')
+# @skipUnless(os.environ.get('FEATURE_GROUP_CONFIGURATIONS'), 'Tests Group Configurations feature')
 class SettingsMenuTest(StudioCourseTest):
     """
     Tests that Setting menu is rendered correctly in Studio
@@ -228,7 +228,7 @@ class SettingsMenuTest(StudioCourseTest):
 
 
 @attr('shard_1')
-@skipUnless(os.environ.get('FEATURE_GROUP_CONFIGURATIONS'), 'Tests Group Configurations feature')
+# @skipUnless(os.environ.get('FEATURE_GROUP_CONFIGURATIONS'), 'Tests Group Configurations feature')
 class GroupConfigurationsTest(ContainerBase, SplitTestMixin):
     """
     Tests that Group Configurations page works correctly with previously
