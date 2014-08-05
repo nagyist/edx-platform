@@ -105,7 +105,7 @@ def course_notifications_handler(request, course_key_string=None, action_state_i
     Handle incoming requests for notifications in a RESTful way.
 
     course_key_string and action_state_id must both be set; else a HttpBadResponseRequest is returned.
-    
+
     For each of these operations, the requesting user must have access to the course;
     else a PermissionDenied error is returned.
 
@@ -1130,6 +1130,13 @@ class GroupConfiguration(object):
             configuration['usage'] = usage_info.get(partition.id, [])
             configurations.append(configuration)
         return configurations
+
+    @staticmethod
+    def validate_experiments(store, course, group_configuration_id):
+        """
+        """
+        # Get all Experiments that use Group Configuration
+        experiments = store.get_items(course.id, category='split_test', content={'user_partition_id': group_configuration_id})
 
 
 @require_http_methods(("GET", "POST"))
