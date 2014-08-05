@@ -151,7 +151,7 @@ def import_handler(request, course_key_string):
                 session_status = request.session.setdefault("import_status", {})
                 key = unicode(course_key) + filename
                 session_status[key] = 1
-                request.session.modified = True
+                request.session.save()
 
                 # Do everything from now on in a try-finally block to make sure
                 # everything is properly cleaned up.
@@ -173,7 +173,7 @@ def import_handler(request, course_key_string):
                         tar_file.close()
 
                     session_status[key] = 2
-                    request.session.modified = True
+                    request.session.save()
 
                     # find the 'course.xml' file
                     def get_all_files(directory):
@@ -228,7 +228,7 @@ def import_handler(request, course_key_string):
                     logging.debug('new course at {0}'.format(new_location))
 
                     session_status[key] = 3
-                    request.session.modified = True
+                    request.session.save()
 
                 # Send errors to client with stage at which error occurred.
                 except Exception as exception:   # pylint: disable=W0703
