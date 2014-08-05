@@ -6,6 +6,7 @@ from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
 from edxmako import add_lookup, LOOKUP
 from edxmako.shortcuts import marketing_link
+from edxmako.middleware import MakoMiddleware
 import edxmako.middleware
 from student.tests.factories import UserFactory
 from mock import patch, Mock
@@ -72,3 +73,11 @@ class MakoMiddlewareTest(TestCase):
         self.middleware.process_response(self.request, self.response)
         # requestcontext should be None.
         self.assertIsNone(edxmako.middleware.requestcontext)
+
+
+def mako_middleware_process_request(request):
+    """
+    Process mako middleware request context.
+    """
+    mako_middleware = MakoMiddleware()
+    mako_middleware.process_request(request)

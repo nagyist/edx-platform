@@ -2,6 +2,7 @@
 """
 This test file will verify proper password policy enforcement, which is an option feature
 """
+from django.contrib.auth.models import AnonymousUser
 import json
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -11,6 +12,7 @@ from django.test.utils import override_settings
 from django.conf import settings
 from mock import patch
 from student.views import create_account
+from edxmako.tests import mako_middleware_process_request
 from external_auth.models import ExternalAuthMap
 
 @patch.dict("django.conf.settings.FEATURES", {'ENFORCE_PASSWORD_POLICY': True})
@@ -255,6 +257,10 @@ class TestPasswordPolicy(TestCase):
                                   internal_password=self.url_params['password'],
                                   external_domain='shib:https://idp.stanford.edu/')
         request.session['ExternalAuthMap'] = extauth
+        request.user = AnonymousUser()
+
+        # Process mako middleware request context
+        mako_middleware_process_request(request)
         response = create_account(request)
         self.assertEqual(response.status_code, 200)
         obj = json.loads(response.content)
