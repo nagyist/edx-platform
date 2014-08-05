@@ -254,7 +254,13 @@ class CourseComparisonTest(unittest.TestCase):
                     # get_children was returning drafts for published parents :-(
                     if not getattr(course1_item_child, 'is_draft', False)
                 ]
-                self.assertEqual(expected_children, actual_item.children)
+                actual_children = [
+                   item_child.location
+                   for item_child in actual_item.get_children()
+                   # get_children was returning drafts for published parents :-(
+                   if not getattr(item_child, 'is_draft', False)
+                ]
+                self.assertEqual(expected_children, actual_children)
 
     def assertAssetEqual(self, expected_course_key, expected_asset, actual_course_key, actual_asset):
         """
