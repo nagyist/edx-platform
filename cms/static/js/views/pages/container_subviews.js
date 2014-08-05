@@ -126,18 +126,10 @@ define(["jquery", "underscore", "gettext", "js/views/baseview", "js/views/utils/
             },
 
             publish: function (e) {
-                var xblockInfo = this.model;
                 if (e && e.preventDefault) {
                     e.preventDefault();
                 }
-                ViewUtils.runOperationShowingMessage(gettext('Publishing&hellip;'),
-                    function () {
-                        return xblockInfo.save({publish: 'make_public'}, {patch: true});
-                    }).always(function() {
-                        xblockInfo.set("publish", null);
-                    }).done(function () {
-                        xblockInfo.fetch();
-                    });
+                XBlockViewUtils.publishXBlock(this.model);
             },
 
             discardChanges: function (e) {

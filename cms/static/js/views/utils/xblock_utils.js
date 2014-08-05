@@ -4,7 +4,7 @@
 define(["jquery", "underscore", "gettext", "js/views/utils/view_utils", "js/utils/module"],
     function($, _, gettext, ViewUtils, ModuleUtils) {
         var addXBlock, deleteXBlock, createUpdateRequestData, updateXBlockField, VisibilityState,
-            getXBlockVisibilityClass, getXBlockListTypeClass, updateXBlockFields;
+            getXBlockVisibilityClass, getXBlockListTypeClass, updateXBlockFields, publishXBlock;
 
         /**
          * Represents the possible visibility states for an xblock:
@@ -165,6 +165,17 @@ define(["jquery", "underscore", "gettext", "js/views/utils/view_utils", "js/util
             return listType;
         };
 
+        publishXBlock = function (xblockInfo) {
+            return ViewUtils.runOperationShowingMessage(gettext('Publishing&hellip;'),
+                function () {
+                    return xblockInfo.save({ publish: 'make_public' }, { patch: true });
+                }).always(function() {
+                    xblockInfo.set("publish", null);
+                }).done(function () {
+                    xblockInfo.fetch();
+                });
+        };
+
         return {
             'VisibilityState': VisibilityState,
             'addXBlock': addXBlock,
@@ -172,6 +183,7 @@ define(["jquery", "underscore", "gettext", "js/views/utils/view_utils", "js/util
             'updateXBlockField': updateXBlockField,
             'getXBlockVisibilityClass': getXBlockVisibilityClass,
             'getXBlockListTypeClass': getXBlockListTypeClass,
-            'updateXBlockFields': updateXBlockFields
+            'updateXBlockFields': updateXBlockFields,
+            'publishXBlock': publishXBlock
         };
     });
