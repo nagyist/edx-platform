@@ -233,6 +233,32 @@ class BlockDueDateSerializer(serializers.Serializer):
             self.fields['due_datetime'].required = False
 
 
+class ProblemResetSerializer(UniqueStudentIdentifierSerializer):
+    """
+    serializer for resetting problem.
+    """
+    problem_to_reset = serializers.CharField(
+        help_text=_("The URL name of the problem to reset."),
+        error_messages={
+            'blank': _("Problem URL name cannot be blank."),
+        }
+    )
+    all_students = serializers.BooleanField(
+        default=False,
+        help_text=_("Whether to reset the problem for all students."),
+    )
+    only_if_higher = serializers.BooleanField(
+        default=False,
+    )
+
+    # Override the unique_student_identifier field to make it optional
+    unique_student_identifier = serializers.CharField(
+        required=False,  # Make this field optional
+        allow_null=True,
+        help_text=_("unique student identifier.")
+    )
+
+
 class ModifyAccessSerializer(serializers.Serializer):
     """
     serializers for enroll or un-enroll users in beta testing program.
@@ -347,3 +373,10 @@ class CertificateSerializer(serializers.Serializer):
             return None
 
         return user
+
+
+class RescoreEntranceExamSerializer(serializers.Serializer):
+    """Serializer for entrance exam rescoring"""
+    unique_student_identifier = serializers.CharField(required=False, allow_null=True)
+    all_students = serializers.BooleanField(required=False)
+    only_if_higher = serializers.BooleanField(required=False, allow_null=True)
