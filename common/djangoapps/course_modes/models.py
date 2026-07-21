@@ -268,7 +268,7 @@ class CourseMode(models.Model):
         if self.id is None:
             # If this model has no primary key at save time, it needs to be force-inserted.
             force_insert = True
-        super().save(force_insert, force_update, using)
+        super().save(force_insert=force_insert, force_update=force_update, using=using)
 
     @property
     def slug(self):
@@ -826,7 +826,7 @@ class CourseMode(models.Model):
         """
         ineligible_modes = [cls.AUDIT]
 
-        if settings.FEATURES.get('DISABLE_HONOR_CERTIFICATES', False):
+        if getattr(settings, 'DISABLE_HONOR_CERTIFICATES', False):
             # Adding check so that we can regenerate the certificate for learners who have
             # already earned the certificate using honor mode
             from lms.djangoapps.certificates.data import CertificateStatuses

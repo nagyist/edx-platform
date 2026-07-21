@@ -6,6 +6,7 @@ from textwrap import dedent
 from unittest.mock import MagicMock, patch
 from uuid import uuid4
 
+from django.test import override_settings
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
@@ -586,6 +587,72 @@ class RescoreViewTestCase(GradingEndpointTestBase):
         assert response.status_code == status.HTTP_202_ACCEPTED
         assert mock_submit.call_args[0][3] is True
 
+    @patch('lms.djangoapps.instructor_task.api.submit_rescore_problem_for_student')
+    def test_rescore_only_if_higher_form_encoded_body(self, mock_submit):
+        """
+        only_if_higher sent form-encoded in the POST body (as the instructor
+        dashboard MFE does) must be honored, not silently dropped.
+
+        Regression test: dropping the flag caused "Rescore Only if Score
+        Improves" to run an unconditional rescore and lower learner scores.
+        """
+        mock_task = MagicMock()
+        mock_task.task_id = str(uuid4())
+        mock_submit.return_value = mock_task
+
+        response = self.client.post(
+            self._get_url(),
+            data='learner=test_student&only_if_higher=true',
+            content_type='application/x-www-form-urlencoded',
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert mock_submit.call_args[0][3] is True
+
+    @patch('lms.djangoapps.instructor_task.api.submit_rescore_problem_for_student')
+    def test_rescore_only_if_higher_json_body(self, mock_submit):
+        """only_if_higher as a JSON boolean in the body is honored."""
+        mock_task = MagicMock()
+        mock_task.task_id = str(uuid4())
+        mock_submit.return_value = mock_task
+
+        response = self.client.post(
+            self._get_url(),
+            data={'learner': 'test_student', 'only_if_higher': True},
+            content_type='application/json',
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert mock_submit.call_args[0][3] is True
+
+    @patch('lms.djangoapps.instructor_task.api.submit_rescore_problem_for_student')
+    def test_rescore_only_if_higher_false_in_body(self, mock_submit):
+        """An explicit 'false' string in the body resolves to False."""
+        mock_task = MagicMock()
+        mock_task.task_id = str(uuid4())
+        mock_submit.return_value = mock_task
+
+        response = self.client.post(
+            self._get_url(),
+            data='learner=test_student&only_if_higher=false',
+            content_type='application/x-www-form-urlencoded',
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert mock_submit.call_args[0][3] is False
+
+    @patch('lms.djangoapps.instructor_task.api.submit_rescore_problem_for_student')
+    def test_rescore_only_if_higher_query_param_wins_over_body(self, mock_submit):
+        """The documented query-param contract takes precedence over a conflicting body value."""
+        mock_task = MagicMock()
+        mock_task.task_id = str(uuid4())
+        mock_submit.return_value = mock_task
+
+        response = self.client.post(
+            self._get_url() + '?only_if_higher=true',
+            data='learner=test_student&only_if_higher=false',
+            content_type='application/x-www-form-urlencoded',
+        )
+        assert response.status_code == status.HTTP_202_ACCEPTED
+        assert mock_submit.call_args[0][3] is True
+
     @patch('lms.djangoapps.instructor_task.tasks.rescore_problem.apply_async')
     def test_rescore_all_learners(self, mock_apply):
         """Bulk rescore queues a task and returns 202."""
@@ -692,3 +759,94 @@ class ScoreOverrideViewTestCase(GradingEndpointTestBase):
             format='json',
         )
         assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+class CourseMetadataViewTestCase(ModuleStoreTestCase):
+    """
+    Tests for GET /api/instructor/v2/courses/{course_id} with InstructorDashboardTabsRequested filter.
+    """
+    def setUp(self):
+        super().setUp()
+        self.client = APIClient()
+        self.course = CourseFactory.create()
+        self.instructor = InstructorFactory.create(course_key=self.course.id)
+        self.client.force_authenticate(user=self.instructor)
+
+    @override_settings(
+        OPEN_EDX_FILTERS_CONFIG={
+            "org.openedx.learning.instructor.dashboard.tabs.requested.v1": {
+                "pipeline": [
+                    "common.djangoapps.util.tests.test_filters.TestInstructorDashCustomTab",
+                ],
+                "fail_silently": False,
+            },
+        },
+    )
+    def test_tabs_filter_adds_custom_tab(self):
+        """Test that override settings drive a custom instructor dashboard tab."""
+        url = reverse("instructor_api_v2:course_metadata", kwargs={"course_id": str(self.course.id)})
+        response = self.client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        tabs_by_id = {tab["tab_id"]: tab for tab in data["tabs"]}
+
+        assert "course_info" in tabs_by_id
+        assert "custom" in tabs_by_id
+        assert tabs_by_id["custom"] == {
+            "tab_id": "custom",
+            "title": "Custom Tab",
+            "url": f"/courses/{self.course.id}/instructor/custom",
+            "sort_order": 999,
+        }
+
+    @override_settings(
+        OPEN_EDX_FILTERS_CONFIG={
+            "org.openedx.learning.instructor.dashboard.tabs.requested.v1": {
+                "pipeline": [
+                    "common.djangoapps.util.tests.test_filters.TestPreventTabsGenerationWithTabs",
+                ],
+                "fail_silently": False,
+            },
+        },
+    )
+    def test_tabs_filter_prevent_tabs_generation_with_custom_tabs(self):
+        """
+        Test that when PreventTabsGeneration is raised with a tabs attribute,
+        the serializer uses those custom tabs instead of the default ones.
+        """
+        url = reverse("instructor_api_v2:course_metadata", kwargs={"course_id": str(self.course.id)})
+        with self.assertLogs('openedx_filters.tooling', level='ERROR'):
+            response = self.client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["tabs"] == [{
+            "tab_id": "plugin_tab",
+            "title": "Plugin Tab",
+            "url": f"/courses/{self.course.id}/instructor/plugin",
+            "sort_order": 5,
+        }]
+
+    @override_settings(
+        OPEN_EDX_FILTERS_CONFIG={
+            "org.openedx.learning.instructor.dashboard.tabs.requested.v1": {
+                "pipeline": [
+                    "common.djangoapps.util.tests.test_filters.TestPreventTabsGenerationWithoutTabs",
+                ],
+                "fail_silently": False,
+            },
+        },
+    )
+    def test_tabs_filter_prevent_tabs_generation_without_tabs_attr(self):
+        """
+        Test that when PreventTabsGeneration is raised without a tabs attribute,
+        the serializer falls back to an empty list.
+        """
+        url = reverse("instructor_api_v2:course_metadata", kwargs={"course_id": str(self.course.id)})
+        with self.assertLogs('openedx_filters.tooling', level='ERROR'):
+            response = self.client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["tabs"] == []

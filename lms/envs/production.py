@@ -85,7 +85,6 @@ with codecs.open(CONFIG_FILE, encoding='utf-8') as f:
             'EVENT_BUS_PRODUCER_CONFIG',
             'DEFAULT_FILE_STORAGE',
             'STATICFILES_STORAGE',
-            'OPEN_EDX_FILTERS_CONFIG',
         ]
     })
 
@@ -133,9 +132,10 @@ if STATIC_URL_BASE:  # noqa: F405
 
 DATA_DIR = path(DATA_DIR)  # noqa: F405
 
-# TODO: This was for backwards compatibility back when installed django-cookie-samesite (not since 2022).
-#       The DCS_ version of the setting can be DEPR'd at this point.
-SESSION_COOKIE_SAMESITE = DCS_SESSION_COOKIE_SAMESITE  # noqa: F405
+# Required to be 'None' so the session cookie is sent on cross-site requests
+# (e.g. LMS <-> Studio SSO). Browsers reject SameSite=None unless the cookie
+# is also Secure, so production deployments must serve over HTTPS.
+SESSION_COOKIE_SAMESITE = 'None'
 
 for feature, value in _YAML_TOKENS.get('FEATURES', {}).items():
     FEATURES[feature] = value
@@ -279,19 +279,6 @@ EVENT_TRACKING_BACKENDS['tracking_logs']['OPTIONS']['backends'].update(  # noqa:
 EVENT_TRACKING_BACKENDS['segmentio']['OPTIONS']['processors'][0]['OPTIONS']['whitelist'].extend(  # noqa: F405
     EVENT_TRACKING_SEGMENTIO_EMIT_WHITELIST  # noqa: F405
 )
-
-# Merge OPEN_EDX_FILTERS_CONFIG from YAML into the default defined in common.py.
-# Pipeline steps from YAML are appended after steps defined in common.py.
-# The fail_silently value from YAML takes precedence over the one in common.py.
-for _filter_type, _filter_config in _YAML_TOKENS.get('OPEN_EDX_FILTERS_CONFIG', {}).items():
-    if _filter_type in OPEN_EDX_FILTERS_CONFIG:  # noqa: F405
-        OPEN_EDX_FILTERS_CONFIG[_filter_type]['pipeline'].extend(  # noqa: F405
-            _filter_config.get('pipeline', [])
-        )
-        if 'fail_silently' in _filter_config:
-            OPEN_EDX_FILTERS_CONFIG[_filter_type]['fail_silently'] = _filter_config['fail_silently']  # noqa: F405
-    else:
-        OPEN_EDX_FILTERS_CONFIG[_filter_type] = _filter_config  # noqa: F405
 
 if ENABLE_THIRD_PARTY_AUTH:  # noqa: F405
     AUTHENTICATION_BACKENDS = _YAML_TOKENS.get('THIRD_PARTY_AUTH_BACKENDS', [

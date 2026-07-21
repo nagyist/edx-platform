@@ -8,7 +8,6 @@ from urllib.parse import urlencode
 from uuid import uuid4
 
 import ddt
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.http import Http404
 from django.test import SimpleTestCase, override_settings
@@ -342,29 +341,44 @@ class CourseMetadataViewTest(SharedModuleStoreTestCase, MasqueradeMixin):
         self.assertGreaterEqual(enrollment_counts['honor'], 1)  # noqa: PT009
         self.assertGreaterEqual(enrollment_counts['total'], 3)  # noqa: PT009
 
-    def test_enrollment_counts_excludes_unconfigured_modes(self):
+    def test_enrollment_counts_includes_unconfigured_modes_with_enrollments(self):
         """
-        Test that enrollment counts only include modes configured for the course,
-        not modes that exist on other courses.
+        Test that enrollment counts include modes with active enrollments even
+        when those modes are not explicitly configured for the course.
+
+        Regression test for https://github.com/openedx/frontend-app-instructor-dashboard/issues/210
+        The default enrollment mode (e.g. audit) may not be explicitly configured,
+        but learners can still be enrolled in it. The total must equal the sum of
+        all mode counts.
         """
-        # Only configure audit and honor for this course (not verified)
-        CourseModeFactory.create(course_id=self.course_key, mode_slug='audit')
+        # Only configure 'honor' for this course — do NOT configure 'audit'
         CourseModeFactory.create(course_id=self.course_key, mode_slug='honor')
+
+        # Explicitly create an enrollment in an unconfigured mode
+        CourseEnrollmentFactory.create(
+            user=UserFactory.create(),
+            course_id=self.course_key,
+            mode='audit',
+            is_active=True,
+        )
 
         self.client.force_authenticate(user=self.instructor)
         response = self.client.get(self._get_url())
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)  # noqa: PT009
+        assert response.status_code == status.HTTP_200_OK
         enrollment_counts = response.data['enrollment_counts']
 
-        # Only configured modes should appear
-        self.assertIn('audit', enrollment_counts)  # noqa: PT009
-        self.assertIn('honor', enrollment_counts)  # noqa: PT009
-        self.assertIn('total', enrollment_counts)  # noqa: PT009
+        # Configured mode must appear
+        assert 'honor' in enrollment_counts
+        # Unconfigured mode with enrollments must also appear
+        assert 'audit' in enrollment_counts
+        assert enrollment_counts['audit'] >= 1
+        # Total key must be present
+        assert 'total' in enrollment_counts
 
-        # verified is not configured, so it should not appear
-        # (even though there are verified enrollments from setUp)
-        self.assertNotIn('verified', enrollment_counts)  # noqa: PT009
+        # The sum of all mode counts must equal total
+        mode_sum = sum(v for k, v in enrollment_counts.items() if k != 'total')
+        assert enrollment_counts['total'] == mode_sum
 
     def _get_tabs_from_response(self, user, course_id=None):
         """Helper to get tabs from API response."""
@@ -436,7 +450,7 @@ class CourseMetadataViewTest(SharedModuleStoreTestCase, MasqueradeMixin):
 
         self.assertIn('open_responses', tab_ids)  # noqa: PT009
 
-    @patch('django.conf.settings.FEATURES', {'ENABLE_SPECIAL_EXAMS': True, 'MAX_ENROLLMENT_INSTR_BUTTONS': 200})
+    @override_settings(ENABLE_SPECIAL_EXAMS=True, MAX_ENROLLMENT_INSTR_BUTTONS=200)
     def test_special_exams_tab_with_proctored_exams_enabled(self):
         """
         Test that special_exams tab appears when course has proctored exams enabled.
@@ -446,7 +460,7 @@ class CourseMetadataViewTest(SharedModuleStoreTestCase, MasqueradeMixin):
 
         self.assertIn('special_exams', tab_ids)  # noqa: PT009
 
-    @patch('django.conf.settings.FEATURES', {'ENABLE_SPECIAL_EXAMS': True, 'MAX_ENROLLMENT_INSTR_BUTTONS': 200})
+    @override_settings(ENABLE_SPECIAL_EXAMS=True, MAX_ENROLLMENT_INSTR_BUTTONS=200)
     def test_special_exams_tab_with_timed_exams_enabled(self):
         """
         Test that special_exams tab appears when course has timed exams enabled.
@@ -463,9 +477,8 @@ class CourseMetadataViewTest(SharedModuleStoreTestCase, MasqueradeMixin):
         tab_ids = [tab['tab_id'] for tab in tabs]
         self.assertIn('special_exams', tab_ids)  # noqa: PT009
 
+    @override_settings(MAX_ENROLLMENT_INSTR_BUTTONS=200, ENABLE_CERTIFICATES_INSTRUCTOR_MANAGE=True)
     @patch('lms.djangoapps.instructor.views.serializers_v2.CertificateGenerationConfiguration.current')
-    @patch('django.conf.settings.FEATURES', {'ENABLE_CERTIFICATES_INSTRUCTOR_MANAGE': True,
-                                             'MAX_ENROLLMENT_INSTR_BUTTONS': 200})
     def test_certificates_tab_for_instructor_when_enabled(self, mock_cert_config):
         """
         Test that certificates tab appears for instructors when certificate management is enabled.
@@ -3034,7 +3047,7 @@ class CourseTeamRolesViewTest(SharedModuleStoreTestCase):
         for expected in ['Administrator', 'Moderator', 'Group Moderator', 'Community TA']:
             assert expected in returned_roles
 
-    @override_settings(FEATURES={**settings.FEATURES, 'CUSTOM_COURSES_EDX': True})
+    @override_settings(CUSTOM_COURSES_EDX=True)
     def test_list_roles_with_ccx_enabled(self):
         """Returns all roles including ccx_coach when CCX is enabled for the course."""
         ccx_course = CourseFactory.create(
@@ -3055,7 +3068,7 @@ class CourseTeamRolesViewTest(SharedModuleStoreTestCase):
         ccx_entry = next(r for r in response.data['results'] if r['role'] == 'ccx_coach')
         assert ccx_entry['display_name'] == 'CCX Coach'
 
-    @override_settings(FEATURES={**settings.FEATURES, 'CUSTOM_COURSES_EDX': True})
+    @override_settings(CUSTOM_COURSES_EDX=True)
     def test_roles_sort_order(self):
         """Roles are returned in the expected display order, with ccx_coach last."""
         ccx_course = CourseFactory.create(

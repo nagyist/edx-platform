@@ -252,7 +252,7 @@ def create_account_with_params(request, params):  # pylint: disable=too-many-sta
         redirect_url = get_redirect_url_with_host(root_url, redirect_to)
         compose_and_send_activation_email(user, profile, registration, redirect_url, True)
 
-    if settings.FEATURES.get('ENABLE_DISCUSSION_EMAIL_DIGEST'):
+    if getattr(settings, 'ENABLE_DISCUSSION_EMAIL_DIGEST', False):
         try:
             enable_notifications(user)
         except Exception:  # pylint: disable=broad-except
@@ -374,7 +374,7 @@ def _track_user_registration(user, profile, params, third_party_provider, regist
             'education': profile.level_of_education_display,
             'address': profile.mailing_address,
             'gender': profile.gender_display,
-            'country': str(profile.country),
+            'country': str(profile.country) if profile.country else '',
             'is_marketable': is_marketable,
             'anonymous_id': anonymous_id
         }

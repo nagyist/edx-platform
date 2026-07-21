@@ -70,7 +70,7 @@ def clean_username(username=''):
     """
     Simple helper method to ensure a username is compatible with our system requirements.
     """
-    if settings.FEATURES.get("ENABLE_UNICODE_USERNAME"):
+    if getattr(settings, 'ENABLE_UNICODE_USERNAME', False):
         return ('_').join(re.findall(settings.USERNAME_REGEX_PARTIAL, username))[:USERNAME_MAX_LENGTH]
     else:
         return ('_').join(re.findall(r'[a-zA-Z0-9\-]+', username))[:USERNAME_MAX_LENGTH]
@@ -1061,6 +1061,10 @@ class AppleMigrationUserIdInfo(models.Model):
     """
     Model to store users' Apple Unique Identifier during migration
     process of Apple team from edx Inc. to edx LLC.
+
+    .. pii: Contains Apple user identifiers (old_apple_id, transfer_id, new_apple_id).
+    .. pii_types: external_service
+    .. pii_retirement: local_api
     """
     old_apple_id = models.CharField(max_length=255)
     transfer_id = models.CharField(max_length=255, null=True, blank=True)  # noqa: DJ001

@@ -11,13 +11,17 @@ import waffle  # pylint: disable=invalid-django-waffle-import
 from completion.models import BlockCompletion
 from completion.waffle import ENABLE_COMPLETION_TRACKING_SWITCH
 from django.conf import settings
-from django.db.models import CharField, Value
+from django.db.models import CharField, TextField, Value
 from django.db.models.functions import Cast, Concat
 from django.utils.translation import gettext as _
 from edx_django_utils.user import generate_password
 from social_django.models import UserSocialAuth
 
-from common.djangoapps.student.models import AccountRecovery, Registration, get_retired_email_by_email
+from common.djangoapps.student.models import (
+    AccountRecovery,
+    Registration,
+    get_retired_email_by_email,
+)
 from openedx.core.djangoapps.site_configuration.models import SiteConfiguration
 from openedx.core.djangoapps.theming.helpers import get_config_value_from_site_or_settings, get_current_site
 from openedx.core.djangolib.oauth2_retirement_utils import retire_dot_oauth2_models
@@ -226,23 +230,45 @@ def redact_and_delete_social_auth(user_id, skip_delete=False):
         social_auth_queryset.delete()
 
 
+def redact_and_delete_historical_social_auth(user_id):
+    """
+    Redact PII from all HistoricalUserSocialAuth records for the given user, then delete them.
+
+    Downstream copies of data may use soft-deletes, and redacting before deleting
+    ensures PII for retired users (or future retirements) is not retained.
+    """
+    historical_social_auth_model = UserSocialAuth.history.model
+    historical_queryset = historical_social_auth_model.objects.filter(user_id=user_id)
+    historical_queryset.update(
+        uid=Concat(
+            Value(REDACTED_SOCIAL_AUTH_UID_PREFIX),
+            Cast('history_id', output_field=TextField()),
+            Value(REDACTED_SOCIAL_AUTH_UID_SUFFIX),
+        ),
+        extra_data={},
+    )
+    historical_queryset.delete()
+
+
 def create_retirement_request_and_deactivate_account(user):
     """
-    Adds user to retirement queue, unlinks social auth accounts, changes user passwords
-    and delete tokens and activation keys
+    Adds user to retirement queue, changes user passwords
+    and delete tokens and activation keys.
     """
     # Add user to retirement queue.
     UserRetirementStatus.create_retirement(user)
-
-    # Redact and unlink LMS social auth accounts.
-    redact_and_delete_social_auth(user.id)
 
     # Change LMS password & email
     user.email = get_retired_email_by_email(user.email)
     user.set_unusable_password()
     user.save()
 
-    # TODO: Unlink social accounts & change password on each IDA.
+    # Do not unlink/redact social accounts during the initial retirement request.
+    # If the user cancels retirement during the cool-off period, they must
+    # still be able to authenticate using their existing social account.
+    # Deleting the social account at this stage would permanently break that
+    # login path. Therefore, social account unlinking should only occur
+    # when retirement is finalized after the cool-off period has elapsed.
     # Remove the activation keys sent by email to the user for account activation.
     Registration.objects.filter(user=user).delete()
 

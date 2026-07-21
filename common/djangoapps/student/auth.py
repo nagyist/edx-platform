@@ -11,7 +11,7 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from opaque_keys.edx.locator import LibraryLocator
 from openedx_authz import api as authz_api
-from openedx_authz.constants.permissions import COURSES_CREATE_COURSE, COURSES_MANAGE_ADVANCED_SETTINGS
+from openedx_authz.constants.permissions import COURSES_MANAGE_ADVANCED_SETTINGS
 
 from common.djangoapps.student.roles import (
     CourseBetaTesterRole,
@@ -61,10 +61,10 @@ def user_has_role(user, role):
     # CourseCreator is odd b/c it can be disabled via config
     if isinstance(role, CourseCreatorRole):
         # completely shut down course creation setting
-        if settings.FEATURES.get('DISABLE_COURSE_CREATION', False):
+        if getattr(settings, 'DISABLE_COURSE_CREATION', False):
             return False
         # wide open course creation setting
-        if not settings.FEATURES.get('ENABLE_CREATOR_GROUP', False):
+        if not getattr(settings, 'ENABLE_CREATOR_GROUP', False):
             return True
 
     if role.has_user(user):
@@ -227,9 +227,9 @@ def is_content_creator(user, org):
     """
     Determine whether a user is allowed to create course content for a given organization.
 
-    This function abstracts the permission check for course creation. Depending on the
-    state of the AuthZ feature flag, it delegates the evaluation to either the AuthZ-based
-    RBAC system or the legacy role-based permission system.
+    Neither CourseCreatorRole nor OrgContentCreatorRole has a migrated AuthZ equivalent yet
+    (see ADR 0027), so this always checks the legacy role-based permission system. Once
+    either role gets a migrated equivalent, this should also check AuthZ, gated on that role.
 
     Args:
         user (User): The user whose permissions are being evaluated.
@@ -238,32 +238,8 @@ def is_content_creator(user, org):
     Returns:
         bool: True if the user has permission to create course content in the given
         organization, False otherwise.
-
-    Notes:
-        - When AuthZ is enabled, this checks permissions via RBAC policies.
-        - When AuthZ is disabled, this falls back to legacy Django role checks.
-        - Course creation may still be blocked by global feature flags (e.g.,
-          DISABLE_COURSE_CREATION), which are enforced downstream.
     """
-    if core_toggles.AUTHZ_COURSE_AUTHORING_FLAG.is_enabled():
-        return _has_content_creator_access(user, org)
     return _has_legacy_content_creator_access(user, org)
-
-
-def _has_content_creator_access(user, org):
-    """
-    Check if the user has content creator access based on AuthZ permissions.
-    """
-    if settings.FEATURES.get('DISABLE_COURSE_CREATION', False):
-        return False
-    # Using Org scope. e.g. "course-v1:{org}+*"
-    org_scope_key = authz_api.OrgCourseOverviewGlobData.build_external_key(org)
-
-    return authz_api.is_user_allowed(
-        user.username,
-        COURSES_CREATE_COURSE.identifier,
-        org_scope_key
-    )
 
 
 def _has_legacy_content_creator_access(user, org):

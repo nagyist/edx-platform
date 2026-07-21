@@ -138,6 +138,16 @@ ENABLE_UNICODE_USERNAME = False
 ENABLE_DJANGO_ADMIN_SITE = True
 ENABLE_LMS_MIGRATION = False
 
+# .. toggle_name: ENABLE_FORUM_DAILY_DIGEST
+# .. toggle_implementation: DjangoSetting
+# .. toggle_default: False
+# .. toggle_description: Settings for forums/discussions to on/off daily digest
+#   feature. Set this to True if you want to enable users to subscribe and unsubscribe
+#   for daily digest. This setting enables deprecation of daily digest.
+# .. toggle_use_cases: open_edx
+# .. toggle_creation_date: 2020-03-09
+ENABLE_FORUM_DAILY_DIGEST = False
+
 # .. toggle_name: settings.ENABLE_MASQUERADE
 # .. toggle_implementation: DjangoSetting
 # .. toggle_default: True
@@ -758,6 +768,15 @@ ENABLE_CROSS_DOMAIN_CSRF_COOKIE = False
 # .. toggle_warning: Requires configuration of third party auth
 ENABLE_REQUIRE_THIRD_PARTY_AUTH = False
 
+# .. toggle_name: ENABLE_AUTO_GENERATED_USERNAME
+# .. toggle_implementation: DjangoSetting
+# .. toggle_default: False
+# .. toggle_description: Set to True to enable auto-generation of usernames.
+# .. toggle_use_cases: open_edx
+# .. toggle_creation_date: 2024-02-20
+# .. toggle_warning: Changing this setting may affect user authentication, account management and discussions experience.
+ENABLE_AUTO_GENERATED_USERNAME = False
+
 # Specifies extra XBlock fields that should available when requested via the Course Blocks API
 # Should be a list of tuples of (block_type, field_name), where block_type can also be "*" for all block types.
 # e.g. COURSE_BLOCKS_API_EXTRA_FIELDS = [  ('course', 'other_course_settings'), ("problem", "weight")  ]
@@ -988,10 +1007,6 @@ CODE_JAIL = {
 PYTHON_LIB_FILENAME = 'python_lib.zip'
 
 ############################### DJANGO BUILT-INS ###############################
-
-# django-session-cookie middleware
-DCS_SESSION_COOKIE_SAMESITE = 'None'
-DCS_SESSION_COOKIE_SAMESITE_FORCE_ALL = True
 
 # LMS base
 LMS_BASE = 'localhost:18000'
@@ -3280,22 +3295,6 @@ RECAPTCHA_SITE_KEYS = {
 #     and is required for the reCAPTCHA service to function correctly.
 #     The project ID should be obtained from the Google Cloud Console when creating a reCAPTCHA
 RECAPTCHA_PROJECT_ID = None
-
-# .. setting_name: OPEN_EDX_FILTERS_CONFIG
-# .. setting_default: {}
-# .. setting_description: Configuration dict for openedx-filters pipeline steps.
-#    Keys are filter type strings; values are dicts with 'fail_silently' (bool) and
-#    'pipeline' (list of dotted-path strings to PipelineStep subclasses).
-OPEN_EDX_FILTERS_CONFIG = {
-    "org.openedx.learning.account.settings.read_only_fields.requested.v1": {
-        "fail_silently": True,
-        "pipeline": ["enterprise.filters.accounts.AccountSettingsReadOnlyFieldsStep"],
-    },
-    "org.openedx.learning.dashboard.render.started.v1": {
-        "fail_silently": False,
-        "pipeline": ["enterprise.filters.dashboard.DashboardContextEnricher"],
-    },
-}
 
 ############################## Miscellaneous ###############################
 
